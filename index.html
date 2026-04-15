@@ -82,30 +82,23 @@
 
         function App() {
             const [plannedCourses, setPlannedCourses] = useState(() => {
-                const saved = localStorage.getItem('hust_aiot_v3');
+                // Đổi key để reset lại trạng thái cũ bị ép chọn
+                const saved = localStorage.getItem('hust_aiot_v4');
                 if (saved) return JSON.parse(saved);
                 
-                // Khởi tạo mặc định các môn khóa (locked)
-                const initial = {};
-                COURSES.filter(c => c.locked).forEach(c => {
-                    // Tự động phân bổ luận văn vào kỳ 4, đồ án vào kỳ 3, còn lại kỳ 1
-                    let sem = 1;
-                    if(c.id === 'LV6001') sem = 4;
-                    if(c.id === 'DX6000') sem = 3;
-                    initial[c.id] = { semester: sem, grade: '' };
-                });
-                return initial;
+                // Trả về object rỗng hoàn toàn để user tự chọn từ đầu
+                return {};
             });
             const [activeTab, setActiveTab] = useState('all');
 
             useEffect(() => {
-                localStorage.setItem('hust_aiot_v3', JSON.stringify(plannedCourses));
+                localStorage.setItem('hust_aiot_v4', JSON.stringify(plannedCourses));
             }, [plannedCourses]);
 
             const stats = useMemo(() => {
                 const current = { 
-                    masterTotal: 0, // Tổng TC Thạc sĩ (Tối đa 60)
-                    bonusTotal: 0,  // Tổng TC bổ sung (Tối đa 7)
+                    masterTotal: 0, 
+                    bonusTotal: 0,  
                     categories: {}, 
                     gpaTotalScore: 0, 
                     gpaTotalCredits: 0 
@@ -143,11 +136,6 @@
             };
             
             const removeCourse = (courseId) => {
-                const course = COURSES.find(c => c.id === courseId);
-                if(course && course.locked) {
-                    alert("Đây là môn bắt buộc theo chương trình của bạn, không thể xóa!");
-                    return;
-                }
                 const newPlan = { ...plannedCourses };
                 delete newPlan[courseId];
                 setPlannedCourses(newPlan);
@@ -260,7 +248,7 @@
                                         
                                         return (
                                             <div key={course.id} className={`p-3 rounded-xl border-2 transition-all ${isAdded ? 'border-slate-100 bg-slate-50 opacity-60' : `border-${cat.color.split('-')[1]}-100 bg-white hover:border-${cat.color.split('-')[1]}-300 hover:shadow-md cursor-pointer`}`}
-                                                 onClick={() => !isAdded && !course.locked ? addCourse(course.id) : null}>
+                                                 onClick={() => !isAdded ? addCourse(course.id) : null}>
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex-1 pr-3">
                                                         <div className="flex items-center gap-2 mb-1.5">
@@ -271,18 +259,12 @@
                                                         <p className="text-xs font-medium text-slate-500 mt-1"><i className="fas fa-hashtag text-[10px] opacity-50 mr-1"></i>{course.id} • <i className="far fa-clock text-[10px] opacity-50 mx-1"></i>{course.credits} TC</p>
                                                     </div>
                                                     
-                                                    {course.locked ? (
-                                                        <div className="shrink-0 w-8 h-8 flex items-center justify-center text-red-400 bg-red-50 rounded-full" title="Môn bắt buộc">
-                                                            <i className="fas fa-lock"></i>
-                                                        </div>
-                                                    ) : (
-                                                        <button 
-                                                            onClick={(e) => { e.stopPropagation(); isAdded ? removeCourse(course.id) : addCourse(course.id); }}
-                                                            className={`shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors ${isAdded ? 'bg-slate-200 text-slate-500 hover:bg-red-100 hover:text-red-600' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-600 hover:text-white'}`}
-                                                        >
-                                                            <i className={`fas ${isAdded ? 'fa-minus' : 'fa-plus'}`}></i>
-                                                        </button>
-                                                    )}
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); isAdded ? removeCourse(course.id) : addCourse(course.id); }}
+                                                        className={`shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors ${isAdded ? 'bg-slate-200 text-slate-500 hover:bg-red-100 hover:text-red-600' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-600 hover:text-white'}`}
+                                                    >
+                                                        <i className={`fas ${isAdded ? 'fa-minus' : 'fa-plus'}`}></i>
+                                                    </button>
                                                 </div>
                                             </div>
                                         );
@@ -325,12 +307,9 @@
                                                             return (
                                                                 <div key={course.id} className={`bg-white border-l-4 ${isCompleted ? 'border-l-green-400 border-y border-r border-slate-200 bg-green-50/20' : `border-l-${cat.color.split('-')[1]}-400 border-y border-r border-slate-200`} rounded-r-lg p-3 shadow-sm relative group`}>
                                                                     
-                                                                    {/* Nút xóa (chỉ hiện khi di chuột và không phải môn bắt buộc) */}
-                                                                    {!course.locked && (
-                                                                        <button onClick={() => removeCourse(course.id)} className="absolute top-2 right-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                            <i className="fas fa-times-circle text-lg"></i>
-                                                                        </button>
-                                                                    )}
+                                                                    <button onClick={() => removeCourse(course.id)} className="absolute top-2 right-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                        <i className="fas fa-times-circle text-lg"></i>
+                                                                    </button>
 
                                                                     <div className="pr-6">
                                                                         <h4 className="text-sm font-bold text-slate-800 leading-tight mb-1">{course.name}</h4>
