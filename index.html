@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kế hoạch học tập Thạc sĩ AIoT</title>
+    
+    <!-- Tailwind CSS cho giao diện -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome cho các biểu tượng (Icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Thư viện React -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel để biên dịch JSX ngay trên trình duyệt -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        const COURSES = [
+            { id: 'SS6010', name: 'Triết học', credits: 3, category: 'chung', required: true },
+            { id: 'DX6000', name: 'Đồ án nghiên cứu đề xuất', credits: 6, category: 'rong' },
+            { id: 'IT4210', name: 'Hệ nhúng', credits: 3, category: 'rong' },
+            { id: 'IT4735', name: 'IoT và ứng dụng', credits: 2, category: 'rong' },
+            { id: 'IT4931', name: 'Lưu trữ và xử lý dữ liệu lớn', credits: 3, category: 'rong' },
+            { id: 'IT4263', name: 'An ninh mạng', credits: 3, category: 'rong' },
+            { id: 'IT4025', name: 'Mật mã ứng dụng', credits: 3, category: 'rong' },
+            { id: 'IT5208', name: 'Thống kê ứng dụng', credits: 3, category: 'nangcao' },
+            { id: 'IT6820', name: 'Kiến trúc máy tính tiên tiến', credits: 2, category: 'nangcao' },
+            { id: 'IT4922', name: 'Mạng thế hệ sau', credits: 2, category: 'nangcao' },
+            { id: 'IT5320', name: 'An toàn thông tin cho IoT', credits: 2, category: 'nangcao' },
+            { id: 'IT5421', name: 'Chuyên đề nghiên cứu 1', credits: 3, category: 'nangcao' },
+            { id: 'IT5422', name: 'Chuyên đề nghiên cứu 2', credits: 3, category: 'nangcao' },
+            { id: 'IT5310', name: 'Các công nghệ truyền thông cho IoT', credits: 3, category: 'aiot', required: true },
+            { id: 'IT4653', name: 'Học sâu và ứng dụng', credits: 2, category: 'aiot', required: true },
+            { id: 'IT5427', name: 'Tích hợp và Xử lý dữ liệu lớn', credits: 3, category: 'aiot', required: true },
+            { id: 'IT6130', name: 'Lập trình và ảo hóa cho IoT', credits: 2, category: 'aiot', required: true },
+            { id: 'IT5425', name: 'Quản trị dữ liệu và trực quan hóa', credits: 2, category: 'aiot', required: true },
+            { id: 'IT5409', name: 'Thị giác máy tính', credits: 3, category: 'aiot', required: true },
+            { id: 'LV6001', name: 'Luận văn thạc sỹ', credits: 15, category: 'luanvan', required: true },
+        ];
+
+        const CATEGORIES = [
+            { id: 'chung', name: 'Kiến thức chung', required: 3, color: 'bg-slate-500', text: 'text-slate-700', bg: 'bg-slate-100' },
+            { id: 'rong', name: 'Kiến thức ngành rộng', required: 12, color: 'bg-blue-500', text: 'text-blue-700', bg: 'bg-blue-50' },
+            { id: 'nangcao', name: 'Ngành nâng cao', required: 15, color: 'bg-purple-500', text: 'text-purple-700', bg: 'bg-purple-50' },
+            { id: 'aiot', name: 'Mô-đun AIoT', required: 15, color: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50' },
+            { id: 'luanvan', name: 'Luận văn tốt nghiệp', required: 15, color: 'bg-amber-500', text: 'text-amber-700', bg: 'bg-amber-50' },
+        ];
+
+        function App() {
+            const [plannedCourses, setPlannedCourses] = useState({});
+            const [activeTab, setActiveTab] = useState('all');
+
+            const stats = useMemo(() => {
+                const current = { total: 0, categories: {} };
+                CATEGORIES.forEach(c => current.categories[c.id] = 0);
+
+                Object.keys(plannedCourses).forEach(courseId => {
+                    const course = COURSES.find(c => c.id === courseId);
+                    if (course) {
+                        current.total += course.credits;
+                        current.categories[course.category] += course.credits;
+                    }
+                });
+                return current;
+            }, [plannedCourses]);
+
+            const addCourse = (courseId, semester = 1) => setPlannedCourses(prev => ({ ...prev, [courseId]: semester }));
+            const removeCourse = (courseId) => {
+                const newPlan = { ...plannedCourses };
+                delete newPlan[courseId];
+                setPlannedCourses(newPlan);
+            };
+            const changeSemester = (courseId, newSemester) => setPlannedCourses(prev => ({ ...prev, [courseId]: parseInt(newSemester) }));
+            const isCoursePlanned = (courseId) => plannedCourses.hasOwnProperty(courseId);
+
+            const semesterPlans = [1, 2, 3, 4].map(sem => ({
+                semester: sem,
+                courses: Object.entries(plannedCourses)
+                    .filter(([_, s]) => s === sem)
+                    .map(([id]) => COURSES.find(c => c.id === id))
+                    .filter(Boolean)
+            }));
+
+            return (
+                <div className="min-h-screen text-slate-900 font-sans p-4 md:p-8">
+                    <header className="max-w-6xl mx-auto mb-8">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="bg-red-600 p-3 rounded-lg text-white">
+                                <i className="fas fa-graduation-cap text-2xl"></i>
+                            </div>
+                            <div>
+                                <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Kế hoạch học tập AIoT</h1>
+                                <p className="text-slate-500 font-medium">Đại học Bách Khoa Hà Nội - Chương trình Thạc sĩ</p>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        {/* Cột trái */}
+                        <div className="lg:col-span-5 flex flex-col gap-6">
+                            {/* Tiến độ */}
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                                <div className="flex justify-between items-end mb-4">
+                                    <h2 className="text-lg font-bold flex items-center gap-2">
+                                        <i className="fas fa-chart-bar text-indigo-500"></i> Tiến độ tín chỉ
+                                    </h2>
+                                    <span className="text-2xl font-black text-indigo-600">{stats.total}<span className="text-sm text-slate-400 font-medium">/60 TC</span></span>
+                                </div>
+                                
+                                <div className="w-full bg-slate-100 rounded-full h-3 mb-6 overflow-hidden flex">
+                                    <div className="bg-indigo-500 h-3 transition-all" style={{ width: `${Math.min(100, (stats.total / 60) * 100)}%` }}></div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {CATEGORIES.map(cat => (
+                                        <div key={cat.id}>
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <span className="font-medium text-slate-700 flex items-center gap-1.5">
+                                                    <div className={`w-2.5 h-2.5 rounded-full ${cat.color}`}></div>
+                                                    {cat.name}
+                                                </span>
+                                                <span className="text-slate-500">{stats.categories[cat.id]} / {cat.required}</span>
+                                            </div>
+                                            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                <div className={`${cat.color} h-1.5 transition-all`} style={{ width: `${Math.min(100, (stats.categories[cat.id] / cat.required) * 100)}%` }}></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Danh mục môn */}
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col h-[600px]">
+                                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                    <i className="fas fa-bookmark text-indigo-500"></i> Danh mục môn học
+                                </h2>
+                                
+                                <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide border-b border-slate-100">
+                                    <button onClick={() => setActiveTab('all')} className={`px-3 py-1.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === 'all' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+                                        Tất cả
+                                    </button>
+                                    {CATEGORIES.map(cat => (
+                                        <button key={cat.id} onClick={() => setActiveTab(cat.id)} className={`px-3 py-1.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === cat.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+                                            {cat.name}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="overflow-y-auto flex-1 pr-2 space-y-3 custom-scrollbar">
+                                    {COURSES.filter(c => activeTab === 'all' || c.category === activeTab).map(course => {
+                                        const cat = CATEGORIES.find(c => c.id === course.category);
+                                        const isAdded = isCoursePlanned(course.id);
+                                        
+                                        return (
+                                            <div key={course.id} className={`p-3 rounded-lg border transition-all ${isAdded ? 'border-slate-200 bg-slate-50 opacity-60' : `border-${cat.color.split('-')[1]}-200 bg-white hover:shadow-md`}`}>
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex-1 pr-3">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-sm ${cat.bg} ${cat.text}`}>{cat.name}</span>
+                                                            {course.required && <span className="text-[10px] bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded-sm">BẮT BUỘC</span>}
+                                                        </div>
+                                                        <h3 className={`font-semibold text-sm ${isAdded ? 'text-slate-500' : 'text-slate-800'}`}>{course.name}</h3>
+                                                        <p className="text-xs text-slate-500 mt-1">{course.id} • {course.credits} Tín chỉ</p>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => isAdded ? removeCourse(course.id) : addCourse(course.id)}
+                                                        className={`shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors ${isAdded ? 'bg-slate-200 text-slate-500 hover:bg-red-100 hover:text-red-600' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-500 hover:text-white'}`}
+                                                    >
+                                                        <i className={`fas ${isAdded ? 'fa-check' : 'fa-plus'}`}></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cột phải: Bảng phân bổ */}
+                        <div className="lg:col-span-7">
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-full">
+                                <h2 className="text-lg font-bold mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
+                                    <i className="fas fa-table-columns text-indigo-500"></i> Bảng phân bổ học kỳ
+                                </h2>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {semesterPlans.map(plan => {
+                                        const totalSemCredits = plan.courses.reduce((sum, c) => sum + c.credits, 0);
+                                        return (
+                                            <div key={plan.semester} className="bg-slate-50 rounded-xl border border-slate-200 p-4 flex flex-col">
+                                                <div className="flex justify-between items-center mb-3">
+                                                    <h3 className="font-bold text-slate-700">Học kỳ {plan.semester}</h3>
+                                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${totalSemCredits > 0 ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-200 text-slate-500'}`}>
+                                                        {totalSemCredits} TC
+                                                    </span>
+                                                </div>
+                                                
+                                                <div className="flex-1 flex flex-col gap-2 min-h-[120px]">
+                                                    {plan.courses.length === 0 ? (
+                                                        <div className="flex-1 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50">
+                                                            <p className="text-xs text-slate-400 font-medium">Chưa có môn học</p>
+                                                        </div>
+                                                    ) : (
+                                                        plan.courses.map(course => {
+                                                            const cat = CATEGORIES.find(c => c.id === course.category);
+                                                            return (
+                                                                <div key={course.id} className="bg-white border border-slate-200 rounded-lg p-3 shadow-sm hover:border-indigo-300 transition-colors">
+                                                                    <div className="flex justify-between">
+                                                                        <div className="flex-1 pr-2">
+                                                                            <div className="flex items-center gap-1.5 mb-1">
+                                                                                <div className={`w-2 h-2 rounded-full ${cat.color}`}></div>
+                                                                                <span className="text-[10px] text-slate-500 font-medium">{course.id} • {course.credits} TC</span>
+                                                                            </div>
+                                                                            <h4 className="text-sm font-semibold text-slate-800 leading-tight">{course.name}</h4>
+                                                                        </div>
+                                                                        <button onClick={() => removeCourse(course.id)} className="text-slate-300 hover:text-red-500 transition-colors self-start">
+                                                                            <i className="fas fa-trash-alt"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                    
+                                                                    <div className="mt-2 pt-2 border-t border-slate-50 flex items-center justify-between">
+                                                                        <span className="text-[10px] text-slate-400">Chuyển kỳ:</span>
+                                                                        <select 
+                                                                            value={plan.semester}
+                                                                            onChange={(e) => changeSemester(course.id, e.target.value)}
+                                                                            className="text-xs bg-slate-50 border border-slate-200 text-slate-600 rounded px-1 py-0.5 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                                                                        >
+                                                                            {[1, 2, 3, 4].map(s => <option key={s} value={s}>Kỳ {s}</option>)}
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                
+                                <div className="mt-6 bg-indigo-50 rounded-lg p-4 text-sm text-indigo-800 border border-indigo-100 flex gap-3">
+                                    <i className="fas fa-check-circle mt-0.5 text-indigo-500 text-lg"></i>
+                                    <div>
+                                        <p className="font-semibold mb-1">Gợi ý lộ trình AIoT:</p>
+                                        <ul className="list-disc pl-4 space-y-1 text-indigo-700/80">
+                                            <li><strong>Kỳ 1 & 2:</strong> Tập trung học các môn Chung, Ngành rộng và bắt đầu Mô-đun AIoT.</li>
+                                            <li><strong>Kỳ 3:</strong> Hoàn thiện khối Nâng cao và môn Đồ án nghiên cứu đề xuất (DX6000).</li>
+                                            <li><strong>Kỳ 4:</strong> Tập trung toàn thời gian cho Luận văn Thạc sĩ (LV6001 - 15TC).</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
