@@ -3,26 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kế hoạch học tập Thạc sĩ AIoT</title>
+    <title>Kế hoạch & Điểm số Thạc sĩ AIoT</title>
     
-    <!-- Tailwind CSS cho giao diện -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- FontAwesome cho các biểu tượng (Icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Thư viện React -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel để biên dịch JSX ngay trên trình duyệt -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -31,7 +23,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useMemo } = React;
+        const { useState, useMemo, useEffect } = React;
 
         const COURSES = [
             { id: 'SS6010', name: 'Triết học', credits: 3, category: 'chung', required: true },
@@ -65,70 +57,102 @@
         ];
 
         function App() {
-            const [plannedCourses, setPlannedCourses] = useState({});
+            // Lấy dữ liệu từ LocalStorage (Nếu có)
+            const [plannedCourses, setPlannedCourses] = useState(() => {
+                const saved = localStorage.getItem('hust_aiot_data');
+                return saved ? JSON.parse(saved) : {};
+            });
             const [activeTab, setActiveTab] = useState('all');
 
+            // Lưu dữ liệu vào LocalStorage mỗi khi có thay đổi
+            useEffect(() => {
+                localStorage.setItem('hust_aiot_data', JSON.stringify(plannedCourses));
+            }, [plannedCourses]);
+
+            // Tính toán thống kê tín chỉ và GPA
             const stats = useMemo(() => {
-                const current = { total: 0, categories: {} };
+                const current = { total: 0, categories: {}, gpaTotalScore: 0, gpaTotalCredits: 0 };
                 CATEGORIES.forEach(c => current.categories[c.id] = 0);
 
-                Object.keys(plannedCourses).forEach(courseId => {
+                Object.entries(plannedCourses).forEach(([courseId, data]) => {
                     const course = COURSES.find(c => c.id === courseId);
                     if (course) {
                         current.total += course.credits;
                         current.categories[course.category] += course.credits;
+
+                        // Nếu môn học đã được nhập điểm
+                        if (data.grade !== '' && !isNaN(data.grade)) {
+                            current.gpaTotalCredits += course.credits;
+                            current.gpaTotalScore += parseFloat(data.grade) * course.credits;
+                        }
                     }
                 });
+
+                current.gpa = current.gpaTotalCredits > 0 
+                    ? (current.gpaTotalScore / current.gpaTotalCredits).toFixed(2) 
+                    : '0.00';
+                
                 return current;
             }, [plannedCourses]);
 
-            const addCourse = (courseId, semester = 1) => setPlannedCourses(prev => ({ ...prev, [courseId]: semester }));
+            const addCourse = (courseId, semester = 1) => {
+                setPlannedCourses(prev => ({ ...prev, [courseId]: { semester, grade: '' } }));
+            };
+            
             const removeCourse = (courseId) => {
                 const newPlan = { ...plannedCourses };
                 delete newPlan[courseId];
                 setPlannedCourses(newPlan);
             };
-            const changeSemester = (courseId, newSemester) => setPlannedCourses(prev => ({ ...prev, [courseId]: parseInt(newSemester) }));
+
+            const changeSemester = (courseId, newSemester) => {
+                setPlannedCourses(prev => ({ ...prev, [courseId]: { ...prev[courseId], semester: parseInt(newSemester) } }));
+            };
+
+            const updateGrade = (courseId, newGrade) => {
+                setPlannedCourses(prev => ({ ...prev, [courseId]: { ...prev[courseId], grade: newGrade } }));
+            };
+
             const isCoursePlanned = (courseId) => plannedCourses.hasOwnProperty(courseId);
 
             const semesterPlans = [1, 2, 3, 4].map(sem => ({
                 semester: sem,
                 courses: Object.entries(plannedCourses)
-                    .filter(([_, s]) => s === sem)
-                    .map(([id]) => COURSES.find(c => c.id === id))
-                    .filter(Boolean)
+                    .filter(([_, data]) => data.semester === sem)
+                    .map(([id, data]) => ({ ...COURSES.find(c => c.id === id), ...data }))
+                    .filter(c => c.id) // Lọc bỏ undefined
             }));
 
             return (
                 <div className="min-h-screen text-slate-900 font-sans p-4 md:p-8">
-                    <header className="max-w-6xl mx-auto mb-8">
-                        <div className="flex items-center gap-3 mb-2">
+                    <header className="max-w-6xl mx-auto mb-8 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
                             <div className="bg-red-600 p-3 rounded-lg text-white">
                                 <i className="fas fa-graduation-cap text-2xl"></i>
                             </div>
                             <div>
-                                <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Kế hoạch học tập AIoT</h1>
-                                <p className="text-slate-500 font-medium">Đại học Bách Khoa Hà Nội - Chương trình Thạc sĩ</p>
+                                <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Quản lý Học tập AIoT</h1>
+                                <p className="text-slate-500 font-medium">Tự động lưu dữ liệu trình duyệt</p>
                             </div>
+                        </div>
+                        {/* Hiển thị GPA */}
+                        <div className="bg-indigo-600 text-white px-5 py-2 rounded-xl shadow-lg text-center">
+                            <p className="text-xs uppercase tracking-wider font-bold opacity-80">GPA Hiện tại</p>
+                            <p className="text-2xl font-black">{stats.gpa}</p>
                         </div>
                     </header>
 
                     <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
                         {/* Cột trái */}
                         <div className="lg:col-span-5 flex flex-col gap-6">
-                            {/* Tiến độ */}
+                            {/* Tiến độ tín chỉ */}
                             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
                                 <div className="flex justify-between items-end mb-4">
                                     <h2 className="text-lg font-bold flex items-center gap-2">
-                                        <i className="fas fa-chart-bar text-indigo-500"></i> Tiến độ tín chỉ
+                                        <i className="fas fa-chart-pie text-indigo-500"></i> Tiến độ (Đăng ký)
                                     </h2>
                                     <span className="text-2xl font-black text-indigo-600">{stats.total}<span className="text-sm text-slate-400 font-medium">/60 TC</span></span>
                                 </div>
-                                
-                                <div className="w-full bg-slate-100 rounded-full h-3 mb-6 overflow-hidden flex">
-                                    <div className="bg-indigo-500 h-3 transition-all" style={{ width: `${Math.min(100, (stats.total / 60) * 100)}%` }}></div>
-                                </div>
-
                                 <div className="space-y-3">
                                     {CATEGORIES.map(cat => (
                                         <div key={cat.id}>
@@ -154,13 +178,9 @@
                                 </h2>
                                 
                                 <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide border-b border-slate-100">
-                                    <button onClick={() => setActiveTab('all')} className={`px-3 py-1.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === 'all' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
-                                        Tất cả
-                                    </button>
+                                    <button onClick={() => setActiveTab('all')} className={`px-3 py-1.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === 'all' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>Tất cả</button>
                                     {CATEGORIES.map(cat => (
-                                        <button key={cat.id} onClick={() => setActiveTab(cat.id)} className={`px-3 py-1.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === cat.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
-                                            {cat.name}
-                                        </button>
+                                        <button key={cat.id} onClick={() => setActiveTab(cat.id)} className={`px-3 py-1.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === cat.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>{cat.name}</button>
                                     ))}
                                 </div>
 
@@ -175,7 +195,6 @@
                                                     <div className="flex-1 pr-3">
                                                         <div className="flex items-center gap-2 mb-1">
                                                             <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-sm ${cat.bg} ${cat.text}`}>{cat.name}</span>
-                                                            {course.required && <span className="text-[10px] bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded-sm">BẮT BUỘC</span>}
                                                         </div>
                                                         <h3 className={`font-semibold text-sm ${isAdded ? 'text-slate-500' : 'text-slate-800'}`}>{course.name}</h3>
                                                         <p className="text-xs text-slate-500 mt-1">{course.id} • {course.credits} Tín chỉ</p>
@@ -194,11 +213,11 @@
                             </div>
                         </div>
 
-                        {/* Cột phải: Bảng phân bổ */}
+                        {/* Cột phải: Bảng phân bổ & Nhập điểm */}
                         <div className="lg:col-span-7">
                             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-full">
                                 <h2 className="text-lg font-bold mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
-                                    <i className="fas fa-table-columns text-indigo-500"></i> Bảng phân bổ học kỳ
+                                    <i className="fas fa-table-columns text-indigo-500"></i> Bảng học kỳ & Kết quả
                                 </h2>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -221,13 +240,15 @@
                                                     ) : (
                                                         plan.courses.map(course => {
                                                             const cat = CATEGORIES.find(c => c.id === course.category);
+                                                            const isCompleted = course.grade !== '' && !isNaN(course.grade);
+
                                                             return (
-                                                                <div key={course.id} className="bg-white border border-slate-200 rounded-lg p-3 shadow-sm hover:border-indigo-300 transition-colors">
+                                                                <div key={course.id} className={`bg-white border ${isCompleted ? 'border-green-300 bg-green-50/30' : 'border-slate-200'} rounded-lg p-3 shadow-sm hover:border-indigo-300 transition-colors`}>
                                                                     <div className="flex justify-between">
                                                                         <div className="flex-1 pr-2">
                                                                             <div className="flex items-center gap-1.5 mb-1">
                                                                                 <div className={`w-2 h-2 rounded-full ${cat.color}`}></div>
-                                                                                <span className="text-[10px] text-slate-500 font-medium">{course.id} • {course.credits} TC</span>
+                                                                                <span className="text-[10px] text-slate-500 font-medium">{course.id}</span>
                                                                             </div>
                                                                             <h4 className="text-sm font-semibold text-slate-800 leading-tight">{course.name}</h4>
                                                                         </div>
@@ -236,15 +257,28 @@
                                                                         </button>
                                                                     </div>
                                                                     
-                                                                    <div className="mt-2 pt-2 border-t border-slate-50 flex items-center justify-between">
-                                                                        <span className="text-[10px] text-slate-400">Chuyển kỳ:</span>
+                                                                    <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                                                                         <select 
                                                                             value={plan.semester}
                                                                             onChange={(e) => changeSemester(course.id, e.target.value)}
-                                                                            className="text-xs bg-slate-50 border border-slate-200 text-slate-600 rounded px-1 py-0.5 focus:outline-none focus:border-indigo-500 cursor-pointer"
+                                                                            className="text-xs bg-slate-50 border border-slate-200 text-slate-600 rounded px-1.5 py-1 focus:outline-none focus:border-indigo-500 cursor-pointer w-20"
                                                                         >
                                                                             {[1, 2, 3, 4].map(s => <option key={s} value={s}>Kỳ {s}</option>)}
                                                                         </select>
+                                                                        
+                                                                        <div className="flex items-center gap-1">
+                                                                            <span className="text-[10px] text-slate-500 font-medium">Điểm:</span>
+                                                                            <input 
+                                                                                type="number" 
+                                                                                step="0.1"
+                                                                                min="0"
+                                                                                max="10"
+                                                                                placeholder="-"
+                                                                                value={course.grade}
+                                                                                onChange={(e) => updateGrade(course.id, e.target.value)}
+                                                                                className={`text-xs w-14 text-center border rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-bold ${isCompleted ? 'border-green-400 text-green-700 bg-green-50' : 'border-slate-200'}`}
+                                                                            />
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             );
@@ -254,18 +288,6 @@
                                             </div>
                                         );
                                     })}
-                                </div>
-                                
-                                <div className="mt-6 bg-indigo-50 rounded-lg p-4 text-sm text-indigo-800 border border-indigo-100 flex gap-3">
-                                    <i className="fas fa-check-circle mt-0.5 text-indigo-500 text-lg"></i>
-                                    <div>
-                                        <p className="font-semibold mb-1">Gợi ý lộ trình AIoT:</p>
-                                        <ul className="list-disc pl-4 space-y-1 text-indigo-700/80">
-                                            <li><strong>Kỳ 1 & 2:</strong> Tập trung học các môn Chung, Ngành rộng và bắt đầu Mô-đun AIoT.</li>
-                                            <li><strong>Kỳ 3:</strong> Hoàn thiện khối Nâng cao và môn Đồ án nghiên cứu đề xuất (DX6000).</li>
-                                            <li><strong>Kỳ 4:</strong> Tập trung toàn thời gian cho Luận văn Thạc sĩ (LV6001 - 15TC).</li>
-                                        </ul>
-                                    </div>
                                 </div>
                             </div>
                         </div>
