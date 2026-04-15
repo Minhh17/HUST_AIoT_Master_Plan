@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kế hoạch & Điểm số Thạc sĩ AIoT</title>
+    <title>Trợ lý Kế hoạch & Điểm số Thạc sĩ AIoT</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,93 +19,111 @@
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50 text-slate-800">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
 
+        // Dữ liệu đã được chuẩn hóa theo đúng cấu trúc của bạn
         const COURSES = [
-            { id: 'DX6000', name: 'Đồ án đề xuất', credits: 6, category: 'doan', required: true },
-            { id: 'IT4611', name: 'Các hệ thống phân tán và ứng dụng', credits: 2, category: 'bosung' },
-            { id: 'IT3011', name: 'Cấu trúc dữ liệu và thuật toán', credits: 2, category: 'bosung' },
-            { id: 'IT3090', name: 'Cơ sở dữ liệu', credits: 3, category: 'bosung' },
-            { id: 'IT3030', name: 'Kiến trúc máy tính', credits: 3, category: 'bosung' },
-            { id: 'IT3100', name: 'Lập trình hướng đối tượng', credits: 2, category: 'bosung' },
-            { id: 'IT4060', name: 'Lập trình mạng', credits: 2, category: 'bosung' },
-            { id: 'IT3080', name: 'Mạng máy tính', credits: 3, category: 'bosung' },
-            { id: 'IT4015', name: 'Nhập môn An toàn thông tin', credits: 3, category: 'bosung' },
-            { id: 'IT3190', name: 'Nhập môn Học máy và khai phá dữ liệu', credits: 3, category: 'bosung' },
-            { id: 'IT4593', name: 'Nhập môn Kỹ thuật truyền thông', credits: 2, category: 'bosung' },
-            { id: 'IT3160', name: 'Nhập môn Trí tuệ nhân tạo', credits: 3, category: 'bosung' },
-            { id: 'IT3120', name: 'Phân tích và thiết kế hệ thống', credits: 2, category: 'bosung' },
-            { id: 'IT3170', name: 'Thuật toán ứng dụng', credits: 2, category: 'bosung' },
-            { id: 'IT4172', name: 'Xử lý tín hiệu', credits: 2, category: 'bosung' },
-            { id: 'SS6013', name: 'Triết học', credits: 3, category: 'chung', required: true },
-            { id: 'IT5320', name: 'An toàn thông tin cho IoT', credits: 2, category: 'nangcao', required: true },
-            { id: 'IT5421', name: 'Chuyên đề nghiên cứu 1', credits: 3, category: 'nangcao', required: true },
-            { id: 'IT5422', name: 'Chuyên đề nghiên cứu 2', credits: 3, category: 'nangcao', required: true },
-            { id: 'IT6820', name: 'Kiến trúc máy tính tiên tiến', credits: 2, category: 'nangcao', required: true },
-            { id: 'IT4922', name: 'Mạng thế hệ sau', credits: 2, category: 'nangcao', required: true },
-            { id: 'IT5208', name: 'Thống kê ứng dụng', credits: 3, category: 'nangcao', required: true },
+            // Khối Bổ sung (User specific)
+            { id: 'IT3160', name: 'Nhập môn Trí tuệ nhân tạo', credits: 3, category: 'bosung', locked: true },
+            { id: 'IT4735', name: 'Internet vạn vật và ứng dụng', credits: 2, category: 'bosung', locked: true },
+            { id: 'IT4611', name: 'Các hệ thống phân tán và ứng dụng', credits: 2, category: 'bosung', locked: true },
+            
+            // Khối Chung
+            { id: 'SS6013', name: 'Triết học', credits: 3, category: 'chung', locked: true },
+            
+            // Khối Ngành Rộng (12TC: 6TC bắt buộc + 6TC tự chọn)
+            { id: 'DX6000', name: 'Đồ án đề xuất', credits: 6, category: 'rong', locked: true },
             { id: 'IT4263', name: 'An ninh mạng', credits: 3, category: 'rong' },
             { id: 'IT4409', name: 'Công nghệ Web và dịch vụ trực tuyến', credits: 3, category: 'rong' },
             { id: 'IT4210', name: 'Hệ nhúng', credits: 3, category: 'rong' },
-            { id: 'IT4735', name: 'Internet vạn vật và ứng dụng', credits: 2, category: 'rong' },
             { id: 'IT4931', name: 'Lưu trữ và Xử lý dữ liệu lớn', credits: 3, category: 'rong' },
             { id: 'IT4025', name: 'Mật mã ứng dụng', credits: 3, category: 'rong' },
             { id: 'IT4785', name: 'Phát triển ứng dụng cho thiết bị di động', credits: 2, category: 'rong' },
             { id: 'IT4831', name: 'Phòng chống tấn công mạng', credits: 2, category: 'rong' },
             { id: 'IT4651', name: 'Thiết kế và triển khai mạng IP', credits: 3, category: 'rong' },
             { id: 'IT4681', name: 'Truyền thông đa phương tiện', credits: 3, category: 'rong' },
-            { id: 'LV6001', name: 'Luận văn tốt nghiệp', credits: 15, category: 'luanvan' },
+
+            // Khối Nâng cao (15TC Bắt buộc toàn bộ)
+            { id: 'IT5320', name: 'An toàn thông tin cho IoT', credits: 2, category: 'nangcao', locked: true },
+            { id: 'IT5421', name: 'Chuyên đề nghiên cứu 1', credits: 3, category: 'nangcao', locked: true },
+            { id: 'IT5422', name: 'Chuyên đề nghiên cứu 2', credits: 3, category: 'nangcao', locked: true },
+            { id: 'IT6820', name: 'Kiến trúc máy tính tiên tiến', credits: 2, category: 'nangcao', locked: true },
+            { id: 'IT4922', name: 'Mạng thế hệ sau', credits: 2, category: 'nangcao', locked: true },
+            { id: 'IT5208', name: 'Thống kê ứng dụng', credits: 3, category: 'nangcao', locked: true },
+
+            // Khối Mô-đun (Chọn 15TC)
             { id: 'IT6160', name: 'AI trong An toàn thông tin', credits: 2, category: 'modun' },
             { id: 'IT4527', name: 'BlockChain và ứng dụng', credits: 2, category: 'modun' },
             { id: 'IT5310', name: 'Các công nghệ truyền thông cho IoT', credits: 3, category: 'modun' },
             { id: 'IT5550', name: 'Các giải pháp và chính sách an ninh mạng', credits: 3, category: 'modun' },
             { id: 'IT4653', name: 'Học sâu và ứng dụng', credits: 2, category: 'modun' },
-            { id: 'IT6130.23', name: 'Lập trình và ảo hóa cho IoT', credits: 3, category: 'modun' },
-            { id: 'IT6130', name: 'Lập trình và ảo hóa cho IoT', credits: 2, category: 'modun' },
+            { id: 'IT6130.23', name: 'Lập trình và ảo hóa cho IoT (3TC)', credits: 3, category: 'modun' },
+            { id: 'IT6130', name: 'Lập trình và ảo hóa cho IoT (2TC)', credits: 2, category: 'modun' },
             { id: 'IT5425', name: 'Quản trị dữ liệu và trực quan hóa', credits: 2, category: 'modun' },
             { id: 'IT5409', name: 'Thị giác máy tính', credits: 3, category: 'modun' },
-            { id: 'IT5427', name: 'Tích hợp và xử lý dữ liệu lớn', credits: 3, category: 'modun' }
+            { id: 'IT5427', name: 'Tích hợp và xử lý dữ liệu lớn', credits: 3, category: 'modun' },
+
+            // Luận văn
+            { id: 'LV6001', name: 'Luận văn tốt nghiệp', credits: 15, category: 'luanvan', locked: true },
         ];
 
         const CATEGORIES = [
-            { id: 'bosung', name: 'Kiến thức bổ sung', required: 'Tuỳ chọn', color: 'bg-orange-500', text: 'text-orange-700', bg: 'bg-orange-50' },
-            { id: 'chung', name: 'Kiến thức chung', required: 3, color: 'bg-slate-500', text: 'text-slate-700', bg: 'bg-slate-100' },
-            { id: 'doan', name: 'Đồ án đề xuất', required: 6, color: 'bg-indigo-500', text: 'text-indigo-700', bg: 'bg-indigo-50' },
-            { id: 'nangcao', name: 'Ngành nâng cao', required: 15, color: 'bg-purple-500', text: 'text-purple-700', bg: 'bg-purple-50' },
-            { id: 'rong', name: 'Ngành rộng', required: 'Tuỳ chọn', color: 'bg-blue-500', text: 'text-blue-700', bg: 'bg-blue-50' },
-            { id: 'modun', name: 'Mô-đun định hướng', required: 'Tuỳ chọn', color: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50' },
-            { id: 'luanvan', name: 'Luận văn tốt nghiệp', required: 15, color: 'bg-amber-500', text: 'text-amber-700', bg: 'bg-amber-50' }
+            { id: 'chung', name: 'Kiến thức chung', req: 3, color: 'bg-slate-500', text: 'text-slate-700', bg: 'bg-slate-100' },
+            { id: 'rong', name: 'Ngành rộng (Gồm ĐA Đề xuất)', req: 12, color: 'bg-blue-500', text: 'text-blue-700', bg: 'bg-blue-50' },
+            { id: 'nangcao', name: 'Ngành nâng cao', req: 15, color: 'bg-purple-500', text: 'text-purple-700', bg: 'bg-purple-50' },
+            { id: 'modun', name: 'Mô-đun định hướng (Tự chọn)', req: 15, color: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50' },
+            { id: 'luanvan', name: 'Luận văn tốt nghiệp', req: 15, color: 'bg-amber-500', text: 'text-amber-700', bg: 'bg-amber-50' },
+            { id: 'bosung', name: 'Học bổ sung (Ngành gần)', req: 7, color: 'bg-orange-500', text: 'text-orange-700', bg: 'bg-orange-50' },
         ];
 
         function App() {
-            // Lấy dữ liệu từ LocalStorage (Nếu có)
             const [plannedCourses, setPlannedCourses] = useState(() => {
-                const saved = localStorage.getItem('hust_aiot_data');
-                return saved ? JSON.parse(saved) : {};
+                const saved = localStorage.getItem('hust_aiot_v3');
+                if (saved) return JSON.parse(saved);
+                
+                // Khởi tạo mặc định các môn khóa (locked)
+                const initial = {};
+                COURSES.filter(c => c.locked).forEach(c => {
+                    // Tự động phân bổ luận văn vào kỳ 4, đồ án vào kỳ 3, còn lại kỳ 1
+                    let sem = 1;
+                    if(c.id === 'LV6001') sem = 4;
+                    if(c.id === 'DX6000') sem = 3;
+                    initial[c.id] = { semester: sem, grade: '' };
+                });
+                return initial;
             });
             const [activeTab, setActiveTab] = useState('all');
 
-            // Lưu dữ liệu vào LocalStorage mỗi khi có thay đổi
             useEffect(() => {
-                localStorage.setItem('hust_aiot_data', JSON.stringify(plannedCourses));
+                localStorage.setItem('hust_aiot_v3', JSON.stringify(plannedCourses));
             }, [plannedCourses]);
 
-            // Tính toán thống kê tín chỉ và GPA
             const stats = useMemo(() => {
-                const current = { total: 0, categories: {}, gpaTotalScore: 0, gpaTotalCredits: 0 };
+                const current = { 
+                    masterTotal: 0, // Tổng TC Thạc sĩ (Tối đa 60)
+                    bonusTotal: 0,  // Tổng TC bổ sung (Tối đa 7)
+                    categories: {}, 
+                    gpaTotalScore: 0, 
+                    gpaTotalCredits: 0 
+                };
                 CATEGORIES.forEach(c => current.categories[c.id] = 0);
 
                 Object.entries(plannedCourses).forEach(([courseId, data]) => {
                     const course = COURSES.find(c => c.id === courseId);
                     if (course) {
-                        current.total += course.credits;
                         current.categories[course.category] += course.credits;
+                        
+                        if (course.category === 'bosung') {
+                            current.bonusTotal += course.credits;
+                        } else {
+                            current.masterTotal += course.credits;
+                        }
 
-                        // Nếu môn học đã được nhập điểm
+                        // Tính GPA (Cả môn bổ sung nếu có điểm)
                         if (data.grade !== '' && !isNaN(data.grade)) {
                             current.gpaTotalCredits += course.credits;
                             current.gpaTotalScore += parseFloat(data.grade) * course.credits;
@@ -120,22 +138,26 @@
                 return current;
             }, [plannedCourses]);
 
-            const addCourse = (courseId, semester = 1) => {
-                setPlannedCourses(prev => ({ ...prev, [courseId]: { semester, grade: '' } }));
+            const addCourse = (courseId) => {
+                setPlannedCourses(prev => ({ ...prev, [courseId]: { semester: 1, grade: '' } }));
             };
             
             const removeCourse = (courseId) => {
+                const course = COURSES.find(c => c.id === courseId);
+                if(course && course.locked) {
+                    alert("Đây là môn bắt buộc theo chương trình của bạn, không thể xóa!");
+                    return;
+                }
                 const newPlan = { ...plannedCourses };
                 delete newPlan[courseId];
                 setPlannedCourses(newPlan);
             };
 
-            const changeSemester = (courseId, newSemester) => {
-                setPlannedCourses(prev => ({ ...prev, [courseId]: { ...prev[courseId], semester: parseInt(newSemester) } }));
-            };
-
-            const updateGrade = (courseId, newGrade) => {
-                setPlannedCourses(prev => ({ ...prev, [courseId]: { ...prev[courseId], grade: newGrade } }));
+            const updateData = (courseId, field, value) => {
+                setPlannedCourses(prev => ({ 
+                    ...prev, 
+                    [courseId]: { ...prev[courseId], [field]: field === 'semester' ? parseInt(value) : value } 
+                }));
             };
 
             const isCoursePlanned = (courseId) => plannedCourses.hasOwnProperty(courseId);
@@ -145,97 +167,122 @@
                 courses: Object.entries(plannedCourses)
                     .filter(([_, data]) => data.semester === sem)
                     .map(([id, data]) => ({ ...COURSES.find(c => c.id === id), ...data }))
-                    .filter(c => c.id) // Lọc bỏ undefined
+                    .filter(c => c.id)
+                    .sort((a,b) => a.category.localeCompare(b.category)) // Nhóm theo loại
             }));
 
             return (
-                <div className="min-h-screen text-slate-900 font-sans p-4 md:p-8">
-                    <header className="max-w-6xl mx-auto mb-8 flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-red-600 p-3 rounded-lg text-white">
-                                <i className="fas fa-graduation-cap text-2xl"></i>
+                <div className="min-h-screen p-4 md:p-8">
+                    {/* Header */}
+                    <header className="max-w-6xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-red-700 p-3 rounded-xl shadow-inner text-white">
+                                <i className="fas fa-user-graduate text-3xl"></i>
                             </div>
                             <div>
-                                <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Quản lý Học tập AIoT</h1>
-                                <p className="text-slate-500 font-medium">Tự động lưu dữ liệu trình duyệt</p>
+                                <h1 className="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Kế hoạch Học tập Cá nhân</h1>
+                                <p className="text-slate-500 font-medium mt-1">ĐH Bách Khoa Hà Nội • Thạc sĩ AIoT (Nhóm B)</p>
                             </div>
                         </div>
-                        {/* Hiển thị GPA */}
-                        <div className="bg-indigo-600 text-white px-5 py-2 rounded-xl shadow-lg text-center">
-                            <p className="text-xs uppercase tracking-wider font-bold opacity-80">GPA Hiện tại</p>
-                            <p className="text-2xl font-black">{stats.gpa}</p>
+                        <div className="flex gap-4 w-full md:w-auto">
+                            <div className="bg-white px-5 py-2.5 rounded-xl border border-slate-200 shadow-sm flex-1 md:flex-none text-center">
+                                <p className="text-xs uppercase font-bold text-slate-400 mb-0.5">Tiến độ Thạc sĩ</p>
+                                <p className="text-xl font-black text-slate-700">
+                                    <span className={stats.masterTotal === 60 ? 'text-green-600' : 'text-indigo-600'}>{stats.masterTotal}</span>/60
+                                </p>
+                            </div>
+                            <div className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl shadow-md flex-1 md:flex-none text-center">
+                                <p className="text-xs uppercase font-bold opacity-80 mb-0.5">GPA Tích lũy</p>
+                                <p className="text-xl font-black">{stats.gpa}</p>
+                            </div>
                         </div>
                     </header>
 
                     <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        {/* Cột trái */}
+                        {/* CỘT TRÁI: THEO DÕI & CHỌN MÔN */}
                         <div className="lg:col-span-5 flex flex-col gap-6">
-                            {/* Tiến độ tín chỉ */}
+                            
+                            {/* Thanh tiến độ chi tiết */}
                             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                                <div className="flex justify-between items-end mb-4">
-                                    <h2 className="text-lg font-bold flex items-center gap-2">
-                                        <i className="fas fa-chart-pie text-indigo-500"></i> Tiến độ (Đăng ký)
-                                    </h2>
-                                    <span className="text-2xl font-black text-indigo-600">{stats.total}<span className="text-sm text-slate-400 font-medium">/60 TC</span></span>
-                                </div>
-                                <div className="space-y-3">
+                                <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-800">
+                                    <i className="fas fa-list-check text-indigo-500"></i> Yêu cầu tín chỉ
+                                </h2>
+                                <div className="space-y-4">
                                     {CATEGORIES.map(cat => {
-                                        const isRequiredNumber = typeof cat.required === 'number';
-                                        const percent = isRequiredNumber ? Math.min(100, (stats.categories[cat.id] / cat.required) * 100) : Math.min(100, (stats.categories[cat.id] / 15) * 100);
+                                        const isComplete = stats.categories[cat.id] >= cat.req;
+                                        const overLimit = stats.categories[cat.id] > cat.req;
+                                        const percent = Math.min(100, (stats.categories[cat.id] / cat.req) * 100);
+                                        
                                         return (
                                             <div key={cat.id}>
                                                 <div className="flex justify-between text-sm mb-1">
-                                                    <span className="font-medium text-slate-700 flex items-center gap-1.5">
-                                                        <div className={`w-2.5 h-2.5 rounded-full ${cat.color}`}></div>
+                                                    <span className="font-semibold text-slate-700 flex items-center gap-2">
+                                                        <div className={`w-3 h-3 rounded-md ${cat.color}`}></div>
                                                         {cat.name}
                                                     </span>
-                                                    <span className="text-slate-500">
-                                                        {stats.categories[cat.id]} {isRequiredNumber ? `/ ${cat.required}` : `TC`}
+                                                    <span className={`font-bold ${isComplete ? (overLimit ? 'text-orange-500' : 'text-green-500') : 'text-slate-500'}`}>
+                                                        {stats.categories[cat.id]} / {cat.req}
+                                                        {isComplete && !overLimit && <i className="fas fa-check-circle ml-1"></i>}
                                                     </span>
                                                 </div>
-                                                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                                                    <div className={`${cat.color} h-1.5 transition-all ${!isRequiredNumber && stats.categories[cat.id] === 0 ? 'w-0' : ''}`} style={{ width: `${percent}%` }}></div>
+                                                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                                    <div className={`${isComplete ? 'bg-green-500' : cat.color} h-2 transition-all`} style={{ width: `${percent}%` }}></div>
                                                 </div>
+                                                {/* Cảnh báo thiếu/thừa tín chỉ cho phần Tự chọn */}
+                                                {!isComplete && (cat.id === 'rong' || cat.id === 'modun') && (
+                                                    <p className="text-[10px] text-red-500 mt-1 italic">* Cần chọn thêm {cat.req - stats.categories[cat.id]} TC</p>
+                                                )}
+                                                {overLimit && (cat.id === 'rong' || cat.id === 'modun') && (
+                                                    <p className="text-[10px] text-orange-500 mt-1 italic">* Dư {stats.categories[cat.id] - cat.req} TC (sẽ tính phí thêm)</p>
+                                                )}
                                             </div>
                                         );
                                     })}
                                 </div>
                             </div>
 
-                            {/* Danh mục môn */}
-                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col h-[600px]">
-                                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                    <i className="fas fa-bookmark text-indigo-500"></i> Danh mục môn học
+                            {/* Danh sách môn học để chọn */}
+                            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex-1 flex flex-col h-[550px]">
+                                <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-800">
+                                    <i className="fas fa-book-open text-indigo-500"></i> Cửa hàng môn học
                                 </h2>
                                 
                                 <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide border-b border-slate-100">
-                                    <button onClick={() => setActiveTab('all')} className={`px-3 py-1.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === 'all' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>Tất cả</button>
-                                    {CATEGORIES.map(cat => (
-                                        <button key={cat.id} onClick={() => setActiveTab(cat.id)} className={`px-3 py-1.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === cat.id ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>{cat.name}</button>
-                                    ))}
+                                    <button onClick={() => setActiveTab('all')} className={`px-3 py-1.5 text-sm font-bold rounded-t-lg border-b-2 whitespace-nowrap ${activeTab === 'all' ? 'border-indigo-500 text-indigo-700' : 'border-transparent text-slate-400'}`}>Tất cả</button>
+                                    <button onClick={() => setActiveTab('rong')} className={`px-3 py-1.5 text-sm font-bold rounded-t-lg border-b-2 whitespace-nowrap ${activeTab === 'rong' ? 'border-indigo-500 text-indigo-700' : 'border-transparent text-slate-400'}`}>Tự chọn: Ngành rộng</button>
+                                    <button onClick={() => setActiveTab('modun')} className={`px-3 py-1.5 text-sm font-bold rounded-t-lg border-b-2 whitespace-nowrap ${activeTab === 'modun' ? 'border-indigo-500 text-indigo-700' : 'border-transparent text-slate-400'}`}>Tự chọn: Mô-đun</button>
                                 </div>
 
                                 <div className="overflow-y-auto flex-1 pr-2 space-y-3 custom-scrollbar">
-                                    {COURSES.filter(c => activeTab === 'all' || c.category === activeTab).map(course => {
+                                    {COURSES.filter(c => activeTab === 'all' ? true : c.category === activeTab).map(course => {
                                         const cat = CATEGORIES.find(c => c.id === course.category);
                                         const isAdded = isCoursePlanned(course.id);
                                         
                                         return (
-                                            <div key={course.id} className={`p-3 rounded-lg border transition-all ${isAdded ? 'border-slate-200 bg-slate-50 opacity-60' : `border-${cat.color.split('-')[1]}-200 bg-white hover:shadow-md`}`}>
+                                            <div key={course.id} className={`p-3 rounded-xl border-2 transition-all ${isAdded ? 'border-slate-100 bg-slate-50 opacity-60' : `border-${cat.color.split('-')[1]}-100 bg-white hover:border-${cat.color.split('-')[1]}-300 hover:shadow-md cursor-pointer`}`}
+                                                 onClick={() => !isAdded && !course.locked ? addCourse(course.id) : null}>
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex-1 pr-3">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-sm ${cat.bg} ${cat.text}`}>{cat.name}</span>
+                                                        <div className="flex items-center gap-2 mb-1.5">
+                                                            <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded ${cat.bg} ${cat.text}`}>{cat.name}</span>
+                                                            {course.locked && <span className="text-[10px] bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded"><i className="fas fa-lock mr-1"></i>BẮT BUỘC</span>}
                                                         </div>
-                                                        <h3 className={`font-semibold text-sm ${isAdded ? 'text-slate-500' : 'text-slate-800'}`}>{course.name}</h3>
-                                                        <p className="text-xs text-slate-500 mt-1">{course.id} • {course.credits} Tín chỉ</p>
+                                                        <h3 className={`font-bold text-sm ${isAdded ? 'text-slate-500' : 'text-slate-800'}`}>{course.name}</h3>
+                                                        <p className="text-xs font-medium text-slate-500 mt-1"><i className="fas fa-hashtag text-[10px] opacity-50 mr-1"></i>{course.id} • <i className="far fa-clock text-[10px] opacity-50 mx-1"></i>{course.credits} TC</p>
                                                     </div>
-                                                    <button 
-                                                        onClick={() => isAdded ? removeCourse(course.id) : addCourse(course.id)}
-                                                        className={`shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors ${isAdded ? 'bg-slate-200 text-slate-500 hover:bg-red-100 hover:text-red-600' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-500 hover:text-white'}`}
-                                                    >
-                                                        <i className={`fas ${isAdded ? 'fa-check' : 'fa-plus'}`}></i>
-                                                    </button>
+                                                    
+                                                    {course.locked ? (
+                                                        <div className="shrink-0 w-8 h-8 flex items-center justify-center text-red-400 bg-red-50 rounded-full" title="Môn bắt buộc">
+                                                            <i className="fas fa-lock"></i>
+                                                        </div>
+                                                    ) : (
+                                                        <button 
+                                                            onClick={(e) => { e.stopPropagation(); isAdded ? removeCourse(course.id) : addCourse(course.id); }}
+                                                            className={`shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors ${isAdded ? 'bg-slate-200 text-slate-500 hover:bg-red-100 hover:text-red-600' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-600 hover:text-white'}`}
+                                                        >
+                                                            <i className={`fas ${isAdded ? 'fa-minus' : 'fa-plus'}`}></i>
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         );
@@ -244,29 +291,31 @@
                             </div>
                         </div>
 
-                        {/* Cột phải: Bảng phân bổ & Nhập điểm */}
+                        {/* CỘT PHẢI: XẾP LỊCH & NHẬP ĐIỂM */}
                         <div className="lg:col-span-7">
                             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-full">
-                                <h2 className="text-lg font-bold mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
-                                    <i className="fas fa-table-columns text-indigo-500"></i> Bảng học kỳ & Kết quả
+                                <h2 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-800 border-b border-slate-100 pb-4">
+                                    <i className="fas fa-calendar-alt text-indigo-500"></i> Lộ trình & Kết quả
                                 </h2>
                                 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                     {semesterPlans.map(plan => {
                                         const totalSemCredits = plan.courses.reduce((sum, c) => sum + c.credits, 0);
                                         return (
-                                            <div key={plan.semester} className="bg-slate-50 rounded-xl border border-slate-200 p-4 flex flex-col">
-                                                <div className="flex justify-between items-center mb-3">
-                                                    <h3 className="font-bold text-slate-700">Học kỳ {plan.semester}</h3>
-                                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${totalSemCredits > 0 ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-200 text-slate-500'}`}>
+                                            <div key={plan.semester} className="bg-slate-50 rounded-xl border border-slate-200 p-4 flex flex-col shadow-inner">
+                                                <div className="flex justify-between items-center mb-4 border-b border-slate-200 pb-2">
+                                                    <h3 className="font-extrabold text-slate-700 uppercase tracking-wide text-sm flex items-center gap-2">
+                                                        <i className="fas fa-flag text-indigo-400"></i> Học kỳ {plan.semester}
+                                                    </h3>
+                                                    <span className={`text-xs font-black px-2.5 py-1 rounded-md ${totalSemCredits > 0 ? 'bg-indigo-500 text-white shadow-sm' : 'bg-slate-200 text-slate-400'}`}>
                                                         {totalSemCredits} TC
                                                     </span>
                                                 </div>
                                                 
-                                                <div className="flex-1 flex flex-col gap-2 min-h-[120px]">
+                                                <div className="flex-1 flex flex-col gap-3 min-h-[150px]">
                                                     {plan.courses.length === 0 ? (
-                                                        <div className="flex-1 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50">
-                                                            <p className="text-xs text-slate-400 font-medium">Chưa có môn học</p>
+                                                        <div className="flex-1 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl bg-white/50">
+                                                            <p className="text-sm text-slate-400 font-medium">Trống</p>
                                                         </div>
                                                     ) : (
                                                         plan.courses.map(course => {
@@ -274,40 +323,44 @@
                                                             const isCompleted = course.grade !== '' && !isNaN(course.grade);
 
                                                             return (
-                                                                <div key={course.id} className={`bg-white border ${isCompleted ? 'border-green-300 bg-green-50/30' : 'border-slate-200'} rounded-lg p-3 shadow-sm hover:border-indigo-300 transition-colors`}>
-                                                                    <div className="flex justify-between">
-                                                                        <div className="flex-1 pr-2">
-                                                                            <div className="flex items-center gap-1.5 mb-1">
-                                                                                <div className={`w-2 h-2 rounded-full ${cat.color}`}></div>
-                                                                                <span className="text-[10px] text-slate-500 font-medium">{course.id}</span>
-                                                                            </div>
-                                                                            <h4 className="text-sm font-semibold text-slate-800 leading-tight">{course.name}</h4>
-                                                                        </div>
-                                                                        <button onClick={() => removeCourse(course.id)} className="text-slate-300 hover:text-red-500 transition-colors self-start">
-                                                                            <i className="fas fa-trash-alt"></i>
+                                                                <div key={course.id} className={`bg-white border-l-4 ${isCompleted ? 'border-l-green-400 border-y border-r border-slate-200 bg-green-50/20' : `border-l-${cat.color.split('-')[1]}-400 border-y border-r border-slate-200`} rounded-r-lg p-3 shadow-sm relative group`}>
+                                                                    
+                                                                    {/* Nút xóa (chỉ hiện khi di chuột và không phải môn bắt buộc) */}
+                                                                    {!course.locked && (
+                                                                        <button onClick={() => removeCourse(course.id)} className="absolute top-2 right-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                            <i className="fas fa-times-circle text-lg"></i>
                                                                         </button>
+                                                                    )}
+
+                                                                    <div className="pr-6">
+                                                                        <h4 className="text-sm font-bold text-slate-800 leading-tight mb-1">{course.name}</h4>
+                                                                        <div className="flex items-center gap-2 text-[10px] font-medium text-slate-500 mb-2">
+                                                                            <span className={`px-1.5 py-0.5 rounded ${cat.bg} ${cat.text}`}>{cat.name}</span>
+                                                                            <span>• {course.id}</span>
+                                                                            <span>• {course.credits} TC</span>
+                                                                        </div>
                                                                     </div>
                                                                     
-                                                                    <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                                                                        <select 
-                                                                            value={plan.semester}
-                                                                            onChange={(e) => changeSemester(course.id, e.target.value)}
-                                                                            className="text-xs bg-slate-50 border border-slate-200 text-slate-600 rounded px-1.5 py-1 focus:outline-none focus:border-indigo-500 cursor-pointer w-20"
-                                                                        >
-                                                                            {[1, 2, 3, 4].map(s => <option key={s} value={s}>Kỳ {s}</option>)}
-                                                                        </select>
+                                                                    <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-slate-100">
+                                                                        <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+                                                                            <i className="fas fa-random text-[10px] text-slate-400"></i>
+                                                                            <select 
+                                                                                value={plan.semester}
+                                                                                onChange={(e) => updateData(course.id, 'semester', e.target.value)}
+                                                                                className="text-xs bg-transparent text-slate-700 font-bold focus:outline-none cursor-pointer"
+                                                                            >
+                                                                                {[1, 2, 3, 4].map(s => <option key={s} value={s}>Kỳ {s}</option>)}
+                                                                            </select>
+                                                                        </div>
                                                                         
-                                                                        <div className="flex items-center gap-1">
-                                                                            <span className="text-[10px] text-slate-500 font-medium">Điểm:</span>
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Điểm:</span>
                                                                             <input 
                                                                                 type="number" 
-                                                                                step="0.1"
-                                                                                min="0"
-                                                                                max="10"
-                                                                                placeholder="-"
+                                                                                step="0.1" min="0" max="10" placeholder="-"
                                                                                 value={course.grade}
-                                                                                onChange={(e) => updateGrade(course.id, e.target.value)}
-                                                                                className={`text-xs w-14 text-center border rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-bold ${isCompleted ? 'border-green-400 text-green-700 bg-green-50' : 'border-slate-200'}`}
+                                                                                onChange={(e) => updateData(course.id, 'grade', e.target.value)}
+                                                                                className={`text-sm w-14 text-center border rounded px-1 py-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 font-black transition-colors ${isCompleted ? 'border-green-400 text-green-700 bg-green-100' : 'border-slate-200 text-slate-700'}`}
                                                                             />
                                                                         </div>
                                                                     </div>
