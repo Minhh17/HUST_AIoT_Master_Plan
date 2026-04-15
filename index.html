@@ -26,34 +26,59 @@
         const { useState, useMemo, useEffect } = React;
 
         const COURSES = [
-            { id: 'SS6010', name: 'Triết học', credits: 3, category: 'chung', required: true },
-            { id: 'DX6000', name: 'Đồ án nghiên cứu đề xuất', credits: 6, category: 'rong' },
-            { id: 'IT4210', name: 'Hệ nhúng', credits: 3, category: 'rong' },
-            { id: 'IT4735', name: 'IoT và ứng dụng', credits: 2, category: 'rong' },
-            { id: 'IT4931', name: 'Lưu trữ và xử lý dữ liệu lớn', credits: 3, category: 'rong' },
+            { id: 'DX6000', name: 'Đồ án đề xuất', credits: 6, category: 'doan', required: true },
+            { id: 'IT4611', name: 'Các hệ thống phân tán và ứng dụng', credits: 2, category: 'bosung' },
+            { id: 'IT3011', name: 'Cấu trúc dữ liệu và thuật toán', credits: 2, category: 'bosung' },
+            { id: 'IT3090', name: 'Cơ sở dữ liệu', credits: 3, category: 'bosung' },
+            { id: 'IT3030', name: 'Kiến trúc máy tính', credits: 3, category: 'bosung' },
+            { id: 'IT3100', name: 'Lập trình hướng đối tượng', credits: 2, category: 'bosung' },
+            { id: 'IT4060', name: 'Lập trình mạng', credits: 2, category: 'bosung' },
+            { id: 'IT3080', name: 'Mạng máy tính', credits: 3, category: 'bosung' },
+            { id: 'IT4015', name: 'Nhập môn An toàn thông tin', credits: 3, category: 'bosung' },
+            { id: 'IT3190', name: 'Nhập môn Học máy và khai phá dữ liệu', credits: 3, category: 'bosung' },
+            { id: 'IT4593', name: 'Nhập môn Kỹ thuật truyền thông', credits: 2, category: 'bosung' },
+            { id: 'IT3160', name: 'Nhập môn Trí tuệ nhân tạo', credits: 3, category: 'bosung' },
+            { id: 'IT3120', name: 'Phân tích và thiết kế hệ thống', credits: 2, category: 'bosung' },
+            { id: 'IT3170', name: 'Thuật toán ứng dụng', credits: 2, category: 'bosung' },
+            { id: 'IT4172', name: 'Xử lý tín hiệu', credits: 2, category: 'bosung' },
+            { id: 'SS6013', name: 'Triết học', credits: 3, category: 'chung', required: true },
+            { id: 'IT5320', name: 'An toàn thông tin cho IoT', credits: 2, category: 'nangcao', required: true },
+            { id: 'IT5421', name: 'Chuyên đề nghiên cứu 1', credits: 3, category: 'nangcao', required: true },
+            { id: 'IT5422', name: 'Chuyên đề nghiên cứu 2', credits: 3, category: 'nangcao', required: true },
+            { id: 'IT6820', name: 'Kiến trúc máy tính tiên tiến', credits: 2, category: 'nangcao', required: true },
+            { id: 'IT4922', name: 'Mạng thế hệ sau', credits: 2, category: 'nangcao', required: true },
+            { id: 'IT5208', name: 'Thống kê ứng dụng', credits: 3, category: 'nangcao', required: true },
             { id: 'IT4263', name: 'An ninh mạng', credits: 3, category: 'rong' },
+            { id: 'IT4409', name: 'Công nghệ Web và dịch vụ trực tuyến', credits: 3, category: 'rong' },
+            { id: 'IT4210', name: 'Hệ nhúng', credits: 3, category: 'rong' },
+            { id: 'IT4735', name: 'Internet vạn vật và ứng dụng', credits: 2, category: 'rong' },
+            { id: 'IT4931', name: 'Lưu trữ và Xử lý dữ liệu lớn', credits: 3, category: 'rong' },
             { id: 'IT4025', name: 'Mật mã ứng dụng', credits: 3, category: 'rong' },
-            { id: 'IT5208', name: 'Thống kê ứng dụng', credits: 3, category: 'nangcao' },
-            { id: 'IT6820', name: 'Kiến trúc máy tính tiên tiến', credits: 2, category: 'nangcao' },
-            { id: 'IT4922', name: 'Mạng thế hệ sau', credits: 2, category: 'nangcao' },
-            { id: 'IT5320', name: 'An toàn thông tin cho IoT', credits: 2, category: 'nangcao' },
-            { id: 'IT5421', name: 'Chuyên đề nghiên cứu 1', credits: 3, category: 'nangcao' },
-            { id: 'IT5422', name: 'Chuyên đề nghiên cứu 2', credits: 3, category: 'nangcao' },
-            { id: 'IT5310', name: 'Các công nghệ truyền thông cho IoT', credits: 3, category: 'aiot', required: true },
-            { id: 'IT4653', name: 'Học sâu và ứng dụng', credits: 2, category: 'aiot', required: true },
-            { id: 'IT5427', name: 'Tích hợp và Xử lý dữ liệu lớn', credits: 3, category: 'aiot', required: true },
-            { id: 'IT6130', name: 'Lập trình và ảo hóa cho IoT', credits: 2, category: 'aiot', required: true },
-            { id: 'IT5425', name: 'Quản trị dữ liệu và trực quan hóa', credits: 2, category: 'aiot', required: true },
-            { id: 'IT5409', name: 'Thị giác máy tính', credits: 3, category: 'aiot', required: true },
-            { id: 'LV6001', name: 'Luận văn thạc sỹ', credits: 15, category: 'luanvan', required: true },
+            { id: 'IT4785', name: 'Phát triển ứng dụng cho thiết bị di động', credits: 2, category: 'rong' },
+            { id: 'IT4831', name: 'Phòng chống tấn công mạng', credits: 2, category: 'rong' },
+            { id: 'IT4651', name: 'Thiết kế và triển khai mạng IP', credits: 3, category: 'rong' },
+            { id: 'IT4681', name: 'Truyền thông đa phương tiện', credits: 3, category: 'rong' },
+            { id: 'LV6001', name: 'Luận văn tốt nghiệp', credits: 15, category: 'luanvan' },
+            { id: 'IT6160', name: 'AI trong An toàn thông tin', credits: 2, category: 'modun' },
+            { id: 'IT4527', name: 'BlockChain và ứng dụng', credits: 2, category: 'modun' },
+            { id: 'IT5310', name: 'Các công nghệ truyền thông cho IoT', credits: 3, category: 'modun' },
+            { id: 'IT5550', name: 'Các giải pháp và chính sách an ninh mạng', credits: 3, category: 'modun' },
+            { id: 'IT4653', name: 'Học sâu và ứng dụng', credits: 2, category: 'modun' },
+            { id: 'IT6130.23', name: 'Lập trình và ảo hóa cho IoT', credits: 3, category: 'modun' },
+            { id: 'IT6130', name: 'Lập trình và ảo hóa cho IoT', credits: 2, category: 'modun' },
+            { id: 'IT5425', name: 'Quản trị dữ liệu và trực quan hóa', credits: 2, category: 'modun' },
+            { id: 'IT5409', name: 'Thị giác máy tính', credits: 3, category: 'modun' },
+            { id: 'IT5427', name: 'Tích hợp và xử lý dữ liệu lớn', credits: 3, category: 'modun' }
         ];
 
         const CATEGORIES = [
+            { id: 'bosung', name: 'Kiến thức bổ sung', required: 'Tuỳ chọn', color: 'bg-orange-500', text: 'text-orange-700', bg: 'bg-orange-50' },
             { id: 'chung', name: 'Kiến thức chung', required: 3, color: 'bg-slate-500', text: 'text-slate-700', bg: 'bg-slate-100' },
-            { id: 'rong', name: 'Kiến thức ngành rộng', required: 12, color: 'bg-blue-500', text: 'text-blue-700', bg: 'bg-blue-50' },
+            { id: 'doan', name: 'Đồ án đề xuất', required: 6, color: 'bg-indigo-500', text: 'text-indigo-700', bg: 'bg-indigo-50' },
             { id: 'nangcao', name: 'Ngành nâng cao', required: 15, color: 'bg-purple-500', text: 'text-purple-700', bg: 'bg-purple-50' },
-            { id: 'aiot', name: 'Mô-đun AIoT', required: 15, color: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50' },
-            { id: 'luanvan', name: 'Luận văn tốt nghiệp', required: 15, color: 'bg-amber-500', text: 'text-amber-700', bg: 'bg-amber-50' },
+            { id: 'rong', name: 'Ngành rộng', required: 'Tuỳ chọn', color: 'bg-blue-500', text: 'text-blue-700', bg: 'bg-blue-50' },
+            { id: 'modun', name: 'Mô-đun định hướng', required: 'Tuỳ chọn', color: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50' },
+            { id: 'luanvan', name: 'Luận văn tốt nghiệp', required: 15, color: 'bg-amber-500', text: 'text-amber-700', bg: 'bg-amber-50' }
         ];
 
         function App() {
@@ -130,6 +155,10 @@
                             <div className="bg-red-600 p-3 rounded-lg text-white">
                                 <i className="fas fa-graduation-cap text-2xl"></i>
                             </div>
+                            <div>
+                                <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Quản lý Học tập AIoT</h1>
+                                <p className="text-slate-500 font-medium">Tự động lưu dữ liệu trình duyệt</p>
+                            </div>
                         </div>
                         {/* Hiển thị GPA */}
                         <div className="bg-indigo-600 text-white px-5 py-2 rounded-xl shadow-lg text-center">
@@ -150,20 +179,26 @@
                                     <span className="text-2xl font-black text-indigo-600">{stats.total}<span className="text-sm text-slate-400 font-medium">/60 TC</span></span>
                                 </div>
                                 <div className="space-y-3">
-                                    {CATEGORIES.map(cat => (
-                                        <div key={cat.id}>
-                                            <div className="flex justify-between text-sm mb-1">
-                                                <span className="font-medium text-slate-700 flex items-center gap-1.5">
-                                                    <div className={`w-2.5 h-2.5 rounded-full ${cat.color}`}></div>
-                                                    {cat.name}
-                                                </span>
-                                                <span className="text-slate-500">{stats.categories[cat.id]} / {cat.required}</span>
+                                    {CATEGORIES.map(cat => {
+                                        const isRequiredNumber = typeof cat.required === 'number';
+                                        const percent = isRequiredNumber ? Math.min(100, (stats.categories[cat.id] / cat.required) * 100) : Math.min(100, (stats.categories[cat.id] / 15) * 100);
+                                        return (
+                                            <div key={cat.id}>
+                                                <div className="flex justify-between text-sm mb-1">
+                                                    <span className="font-medium text-slate-700 flex items-center gap-1.5">
+                                                        <div className={`w-2.5 h-2.5 rounded-full ${cat.color}`}></div>
+                                                        {cat.name}
+                                                    </span>
+                                                    <span className="text-slate-500">
+                                                        {stats.categories[cat.id]} {isRequiredNumber ? `/ ${cat.required}` : `TC`}
+                                                    </span>
+                                                </div>
+                                                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                    <div className={`${cat.color} h-1.5 transition-all ${!isRequiredNumber && stats.categories[cat.id] === 0 ? 'w-0' : ''}`} style={{ width: `${percent}%` }}></div>
+                                                </div>
                                             </div>
-                                            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                                                <div className={`${cat.color} h-1.5 transition-all`} style={{ width: `${Math.min(100, (stats.categories[cat.id] / cat.required) * 100)}%` }}></div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
 
